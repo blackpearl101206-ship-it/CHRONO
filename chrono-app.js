@@ -573,6 +573,9 @@ function addTask(data) {
     alarm: data.alarm || DEFAULT_ALARM(),
   };
   state.tasks.push(task);
+  state.view = "today";
+  state.filterCat = "all";
+  state.search = "";
   saveTasks();
   renderAll();
   toast(`Added "${task.taskName}"`);
