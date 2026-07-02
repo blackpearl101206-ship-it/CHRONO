@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#050814" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Chrono" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<title>Chrono — Schedule & Alarms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="daily-schedule.css">
+<link rel="stylesheet" href="chrono-app.css">
+</head>
+<body>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card">
+    <div class="auth-card-top">
+      <video class="auth-logo-video" autoplay muted loop playsinline preload="auto" src="logo.mp4"></video>
+      <div class="auth-card-copy">
+        <div class="logo-title">CHRONO</div>
+        <div class="logo-sub">Modern schedule & alarm</div>
+      </div>
+    </div>
+    <div class="auth-tabs" role="tablist">
+      <button type="button" class="auth-tab is-active" data-auth="login">Login</button>
+      <button type="button" class="auth-tab" data-auth="register">Register</button>
+    </div>
+    <div class="auth-panels">
+      <section class="auth-panel auth-panel--login is-active" data-auth="login">
+        <h1>Welcome back!</h1>
+        <p>Log in to manage your day, personalize alarms, and keep your routine on track.</p>
+        <form id="authLoginForm" class="auth-form auth-form--login">
+          <label class="field">
+            <span>Email</span>
+            <input id="authLoginEmail" type="email" placeholder="yourname@gmail.com" required />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="authLoginPassword" type="password" placeholder="Enter your password" required minlength="6" />
+          </label>
+          <div class="auth-row auth-row--space">
+            <label class="checkbox">
+              <input id="authRemember" type="checkbox" />
+              <span>Remember me</span>
+            </label>
+            <button type="button" class="auth-link" id="authForgot">Forgot password?</button>
+          </div>
+          <button type="submit" class="auth-button auth-button--login">Log in</button>
+          <div class="auth-divider"><span>or continue with</span></div>
+          <div class="auth-socials">
+            <button type="button" class="social-btn social-btn--google" aria-label="Login with Google">G</button>
+            <button type="button" class="social-btn social-btn--apple" aria-label="Login with Apple"></button>
+            <button type="button" class="social-btn social-btn--facebook" aria-label="Login with Facebook">f</button>
+          </div>
+        </form>
+      </section>
+      <section class="auth-panel auth-panel--register" hidden data-auth="register">
+        <div class="register-pill">New here? Create an account</div>
+        <h2>Create your account</h2>
+        <p>Sign up quickly and start building habits with a beautifully designed scheduler.</p>
+        <form id="authRegisterForm" class="auth-form auth-form--register">
+          <label class="field">
+            <span>Full name</span>
+            <input id="authName" type="text" placeholder="John Doe" required />
+          </label>
+          <label class="field">
+            <span>Email address</span>
+            <input id="authRegisterEmail" type="email" placeholder="yourname@gmail.com" required />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="authRegisterPassword" type="password" placeholder="Create a strong password" required minlength="6" />
+          </label>
+          <label class="field">
+            <span>Confirm password</span>
+            <input id="authRegisterConfirm" type="password" placeholder="Repeat password" required minlength="6" />
+          </label>
+          <button type="submit" class="auth-button auth-button--register">Register</button>
+        </form>
+      </section>
+    </div>
+    <div class="auth-note" id="authNote">Use your Gmail address to sign in or register.</div>
+  </div>
+</div>
+
+<!-- BG layers -->
+<div class="bg-stage" aria-hidden="true">
+  <div class="bg-gradient"></div>
+  <div class="bg-orb bg-orb--cyan"></div>
+  <div class="bg-orb bg-orb--magenta"></div>
+  <div class="bg-orb bg-orb--violet"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-noise"></div>
+  <div class="bg-leak"></div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div class="app">
+
+  <!-- ---------- SIDEBAR (desktop only) ---------- -->
+  <aside class="sidebar glass">
+    <div class="brand">
+      <div class="brand-mark">
+        <video class="brand-logo" autoplay muted loop playsinline preload="auto" src="logo.mp4"></video>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">CHRONO</div>
+        <div class="brand-sub">v2.0 · schedule + alarm</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">Workspace</div>
+      <button class="nav-item is-active" data-view="today">
+        <span class="nav-dot"></span>Today
+        <span class="nav-count" id="navCountToday">0</span>
+      </button>
+      <button class="nav-item" data-view="upcoming">
+        <span class="nav-dot"></span>Upcoming
+      </button>
+      <button class="nav-item" data-view="alarm">
+        <span class="nav-dot"></span>Alarm
+      </button>
+      <button class="nav-item" data-view="completed">
+        <span class="nav-dot"></span>Completed
+        <span class="nav-count" id="navCountDone">0</span>
+      </button>
+      <div class="nav-label" style="margin-top:22px">Categories</div>
+      <div class="cat-list" id="catList"></div>
+    </nav>
+    <div class="side-foot">
+      <div class="foot-row">
+        <span>Local storage</span>
+        <span class="pill pill--ok">Synced</span>
+      </div>
+      <button class="foot-clear" id="btnLogout">Logout</button>
+      <button class="foot-clear" id="btnClearAll">Reset schedule</button>
+    </div>
+  </aside>
+
+  <!-- ---------- MAIN ---------- -->
+  <main class="main">
+    <!-- Header -->
+    <header class="topbar">
+      <div class="date-block">
+        <div class="date-day" id="hdrDay">Thursday</div>
+        <div class="date-full">
+          <span id="hdrDate">July 03, 2026</span>
+          <span class="dot-sep">•</span>
+          <span id="hdrClock" class="clock">00:00:00</span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="search glass-inset">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="searchInput" placeholder="Search tasks…" />
+          <kbd>⌘K</kbd>
+        </div>
+        <button class="pill-btn pill-btn--primary" id="btnNew">
+          <span class="pill-glow"></span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          New Task
+        </button>
+      </div>
+    </header>
+
+    <!-- Stat strip -->
+    <section class="stat-strip">
+      <div class="stat glass">
+        <div class="stat-ring">
+          <svg viewBox="0 0 44 44">
+            <circle cx="22" cy="22" r="18" class="ring-track"/>
+            <circle cx="22" cy="22" r="18" class="ring-fill" id="ringProgress"/>
+          </svg>
+          <div class="stat-ring-num" id="ringPct">0%</div>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Day progress</div>
+          <div class="stat-value" id="statDone">0<span>/0 done</span></div>
+        </div>
+      </div>
+      <div class="stat glass">
+        <div class="stat-icon stat-icon--cyan">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Focus time</div>
+          <div class="stat-value" id="statHours">0.0<span>hrs scheduled</span></div>
+        </div>
+      </div>
+      <div class="stat glass">
+        <div class="stat-icon stat-icon--magenta">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Next up</div>
+          <div class="stat-value stat-value--sm" id="statNext">—</div>
+        </div>
+      </div>
+      <div class="stat glass">
+        <div class="stat-icon stat-icon--violet">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L20 7"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Streak</div>
+          <div class="stat-value" id="statStreak">1<span>day active</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter chips -->
+    <div class="chip-row" id="chipRow">
+      <button class="chip is-active" data-cat="all">All</button>
+    </div>
+
+    <!-- Time-block grid -->
+    <section class="grid-wrap glass" id="gridWrap">
+      <div class="grid-head">
+        <div class="grid-title">
+          <h2>Time Blocks</h2>
+          <span class="grid-sub">06:00 → 23:00</span>
+        </div>
+        <div class="now-indicator" id="nowInd">
+          <span class="now-dot"></span>
+          <span id="nowLabel">Now · 00:00</span>
+        </div>
+      </div>
+
+      <div class="grid" id="grid" role="list"></div>
+
+      <div class="grid-empty" id="gridEmpty" hidden>
+        <div class="empty-badge">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+        </div>
+        <h3>Your day is a clean slate</h3>
+        <p>Tap <b>+</b> to block your first hour.</p>
+      </div>
+    </section>
+
+    <section class="alarm-page glass" id="alarmPage" hidden>
+      <div class="grid-head">
+        <div class="grid-title">
+          <h2>Alarm sounds</h2>
+          <span class="grid-sub">Pick one of three random tones or upload your own</span>
+        </div>
+        <button class="pill-btn pill-btn--ghost" id="btnShuffleRings" type="button">
+          Shuffle
+        </button>
+      </div>
+
+      <div class="alarm-picks" id="alarmPicks"></div>
+
+      <div class="alarm-library">
+        <div class="grid-head" style="margin-bottom: 12px;">
+          <div class="grid-title">
+            <h3>Sound library</h3>
+            <span class="grid-sub">Presets + uploaded audio</span>
+          </div>
+          <div class="alarm-default" id="alarmDefaultLabel">Default ringtone for new alarms</div>
+        </div>
+
+        <div class="ring-list" id="alarmRingList"></div>
+
+        <label class="ring-upload" id="alarmUploadLabel" for="alarmUploadInput">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m-5-5 5-5 5 5M5 21h14"/></svg>
+          Upload audio · MP3 · WAV · AAC · M4A
+          <input id="alarmUploadInput" type="file" accept="audio/mpeg,audio/wav,audio/aac,audio/mp4,audio/x-m4a,audio/m4a,audio/ogg,.mp3,.wav,.aac,.m4a,.ogg" />
+        </label>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= MOBILE BOTTOM NAV ================= -->
+<nav class="bottom-nav" aria-label="Bottom nav">
+  <div class="bn-inner">
+    <button class="bn-item is-active" data-view="today" aria-label="Today">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+      Today
+    </button>
+    <button class="bn-item" data-view="focus" aria-label="Focus">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+      Focus
+    </button>
+    <button class="bn-item" data-view="alarm" aria-label="Alarm">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+      Alarm
+    </button>
+    <button class="bn-item is-primary" id="bnNew" aria-label="New task">
+      <div class="bn-fab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+      New
+    </button>
+    <button class="bn-item" data-view="upcoming" aria-label="Upcoming">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+      Upcoming
+    </button>
+    <button class="bn-item" data-view="completed" aria-label="Done">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L20 7"/></svg>
+      Done
+    </button>
+  </div>
+</nav>
+
+<!-- ================= TASK MODAL (with tabs) ================= -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-card glass" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div>
+        <div class="modal-eyebrow" id="modalMode">NEW TASK</div>
+        <h3 id="modalTitle">Block a time slot</h3>
+      </div>
+      <button class="icon-btn" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="modal-tabs" role="tablist">
+      <button type="button" class="modal-tab is-active" data-tab="task" role="tab">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M9 4v17"/></svg>
+        Task
+      </button>
+      <button type="button" class="modal-tab" data-tab="alarm" role="tab">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0"/></svg>
+        Alarm
+        <span class="tab-badge" id="alarmTabBadge" hidden>ON</span>
+      </button>
+    </div>
+
+    <form id="taskForm" class="form">
+
+      <!-- ============ TASK PANE ============ -->
+      <div class="modal-pane is-active" data-pane="task">
+        <label class="field field--full">
+          <span>Task name</span>
+          <input id="fTask" type="text" placeholder="e.g. Deep work — API refactor" required maxlength="80" />
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Starts</span>
+            <input id="fStart" type="time" required />
+          </label>
+          <label class="field">
+            <span>Ends</span>
+            <input id="fEnd" type="time" required />
+          </label>
+        </div>
+        <div class="field field--full">
+          <span>Category</span>
+          <div class="cat-picker" id="catPicker"></div>
+        </div>
+        <label class="field field--full">
+          <span>Notes (optional)</span>
+          <textarea id="fNotes" rows="2" placeholder="Any details, links, or subgoals…" maxlength="240"></textarea>
+        </label>
+      </div>
+
+      <!-- ============ ALARM PANE ============ -->
+      <div class="modal-pane" data-pane="alarm">
+
+        <!-- Reminder -->
+        <div class="pane-label">Reminder · soft nudge</div>
+        <div class="alarm-row">
+          <div class="alarm-row-body">
+            <div class="alarm-row-title">Send me a reminder</div>
+            <div class="alarm-row-sub">Fires at <span id="reminderFireAt">08:50</span></div>
+          </div>
+          <div class="switch is-on" id="swReminder" role="switch" aria-checked="true"></div>
+        </div>
+        <div class="seg" id="reminderSeg"></div>
+
+        <!-- Alarm -->
+        <div class="pane-label magenta" style="margin-top: 10px;">Alarm · hard interrupt</div>
+        <div class="alarm-row">
+          <div class="alarm-row-body">
+            <div class="alarm-row-title">Ring at start time</div>
+            <div class="alarm-row-sub">Full-screen · looping audio · vibration</div>
+          </div>
+          <div class="switch magenta" id="swAlarm" role="switch" aria-checked="false"></div>
+        </div>
+
+        <div class="pane-label">Repeat</div>
+        <div class="days" id="daysRow"></div>
+
+        <div class="pane-label">Snooze</div>
+        <div class="seg" id="snoozeSeg"></div>
+
+        <div class="pane-label violet">Vibration</div>
+        <div class="vib-row" id="vibRow"></div>
+
+        <div class="pane-label">Volume · <span id="volLabel">80%</span></div>
+        <input type="range" id="volSlider" class="vol-slider" min="0" max="100" step="5" value="80" />
+
+        <div class="pane-label">Ringtone</div>
+        <div class="ring-list" id="ringList"></div>
+        <label class="ring-upload" id="uploadLabel" for="uploadInput">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m-5-5 5-5 5 5M5 21h14"/></svg>
+          Upload audio · MP3 · WAV · AAC · M4A
+          <input id="uploadInput" type="file" accept="audio/mpeg,audio/wav,audio/aac,audio/mp4,audio/x-m4a,audio/m4a,audio/ogg,.mp3,.wav,.aac,.m4a,.ogg" />
+        </label>
+        <div class="ring-progress" id="uploadProgress" hidden><div></div></div>
+
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="pill-btn pill-btn--ghost" data-close>Cancel</button>
+        <button type="button" class="pill-btn pill-btn--danger" id="btnDelete" hidden>
+          <span class="pill-glow"></span>
+          Delete
+        </button>
+        <button type="submit" class="pill-btn pill-btn--primary" id="btnSave">
+          <span class="pill-glow"></span>
+          <span id="btnSaveLabel">Add to Schedule</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= REMINDER BANNER ================= -->
+<div class="reminder-banner" id="reminderBanner">
+  <div class="rb-icon">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0v1a3 3 0 0 1-6 0v-1"/></svg>
+  </div>
+  <div class="rb-body">
+    <div class="rb-title" id="rbTitle">Reminder</div>
+    <div class="rb-sub" id="rbSub">Starts soon</div>
+  </div>
+  <button class="rb-close" id="rbClose" aria-label="Dismiss">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+</div>
+
+<!-- ================= FULL-SCREEN ALARM ================= -->
+<div class="alarm-scene" id="alarmScene" role="alertdialog" aria-modal="true" aria-labelledby="alarmTitle">
+  <div class="pulse-ring"></div>
+  <div class="alarm-head">
+    <span class="alarm-eyebrow">ALARM · TIME'S UP</span>
+    <div class="alarm-clock" id="alarmClock">09:00</div>
+    <div class="alarm-date" id="alarmDate">THU · 03 JUL</div>
+  </div>
+  <div class="alarm-body">
+    <h1 id="alarmTitle">Task</h1>
+    <p id="alarmSub">Scheduled 09:00</p>
+  </div>
+  <div class="alarm-actions">
+    <button class="alarm-btn alarm-btn--snooze" id="alarmSnooze">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+      Snooze
+    </button>
+    <button class="alarm-btn alarm-btn--stop" id="alarmStop">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+      Stop
+    </button>
+  </div>
+</div>
+
+<!-- ================= INSTALL STRIP ================= -->
+<div class="info-strip" id="installStrip">
+  <div class="is-icon">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m-5-5 5-5 5 5M5 21h14"/></svg>
+  </div>
+  <div class="is-body">
+    <b>Install Chrono</b> to your home screen — works offline, alarms fire even when the browser is closed.
+  </div>
+  <button class="is-btn" id="installBtn">Install</button>
+  <button class="is-x" id="installX" aria-label="Dismiss">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+</div>
+
+<!-- ================= TOAST ================= -->
+<div id="toast" class="toast" hidden></div>
+
+<script src="chrono-alarm.js"></script>
+<script src="chrono-app.js"></script>
+</body>
+</html>

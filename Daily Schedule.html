@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chrono — Daily Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="daily-schedule.css">
+</head>
+<body>
+
+<!-- ================= BACKGROUND LAYERS ================= -->
+<div class="bg-stage" aria-hidden="true">
+  <div class="bg-gradient"></div>
+  <div class="bg-orb bg-orb--cyan"></div>
+  <div class="bg-orb bg-orb--magenta"></div>
+  <div class="bg-orb bg-orb--violet"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-noise"></div>
+  <div class="bg-leak"></div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div class="app">
+
+  <!-- ---------- SIDEBAR ---------- -->
+  <aside class="sidebar glass">
+    <div class="brand">
+      <div class="brand-mark">
+        <video class="brand-logo" autoplay muted loop playsinline preload="auto" src="logo.mp4"></video>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">CHRONO</div>
+        <div class="brand-sub">v1.0 · daily</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-label">Workspace</div>
+      <button class="nav-item is-active" data-view="today">
+        <span class="nav-dot"></span>Today
+        <span class="nav-count" id="navCountToday">0</span>
+      </button>
+      <button class="nav-item" data-view="upcoming">
+        <span class="nav-dot"></span>Upcoming
+      </button>
+      <button class="nav-item" data-view="completed">
+        <span class="nav-dot"></span>Completed
+        <span class="nav-count" id="navCountDone">0</span>
+      </button>
+
+      <div class="nav-label" style="margin-top:22px">Categories</div>
+      <div class="cat-list" id="catList"><!-- injected --></div>
+    </nav>
+
+    <div class="side-foot">
+      <div class="foot-row">
+        <span>Local storage</span>
+        <span class="pill pill--ok">Synced</span>
+      </div>
+      <button class="foot-clear" id="btnClearAll">Reset schedule</button>
+    </div>
+  </aside>
+
+  <!-- ---------- MAIN ---------- -->
+  <main class="main">
+
+    <!-- Header -->
+    <header class="topbar">
+      <div class="date-block">
+        <div class="date-day" id="hdrDay">Thursday</div>
+        <div class="date-full">
+          <span id="hdrDate">July 02, 2026</span>
+          <span class="dot-sep">•</span>
+          <span id="hdrClock" class="clock">00:00:00</span>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="search glass-inset">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="searchInput" placeholder="Search tasks…" />
+          <kbd>⌘K</kbd>
+        </div>
+        <button class="pill-btn pill-btn--primary" id="btnNew">
+          <span class="pill-glow"></span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          New Task
+        </button>
+      </div>
+    </header>
+
+    <!-- Stat strip -->
+    <section class="stat-strip">
+      <div class="stat glass">
+        <div class="stat-ring">
+          <svg viewBox="0 0 44 44">
+            <circle cx="22" cy="22" r="18" class="ring-track"/>
+            <circle cx="22" cy="22" r="18" class="ring-fill" id="ringProgress"/>
+          </svg>
+          <div class="stat-ring-num" id="ringPct">0%</div>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Day progress</div>
+          <div class="stat-value" id="statDone">0<span>/0 done</span></div>
+        </div>
+      </div>
+
+      <div class="stat glass">
+        <div class="stat-icon stat-icon--cyan">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Focus time</div>
+          <div class="stat-value" id="statHours">0.0<span>hrs scheduled</span></div>
+        </div>
+      </div>
+
+      <div class="stat glass">
+        <div class="stat-icon stat-icon--magenta">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v4H4zM4 12h10v4H4zM4 20h6"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Next up</div>
+          <div class="stat-value stat-value--sm" id="statNext">—</div>
+        </div>
+      </div>
+
+      <div class="stat glass">
+        <div class="stat-icon stat-icon--violet">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L20 7"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-label">Streak</div>
+          <div class="stat-value" id="statStreak">1<span>day active</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter chips -->
+    <div class="chip-row" id="chipRow">
+      <button class="chip is-active" data-cat="all">All</button>
+      <!-- category chips injected -->
+    </div>
+
+    <!-- Time-block grid -->
+    <section class="grid-wrap glass">
+      <div class="grid-head">
+        <div class="grid-title">
+          <h2>Time Blocks</h2>
+          <span class="grid-sub">06:00 → 23:00</span>
+        </div>
+        <div class="now-indicator" id="nowInd">
+          <span class="now-dot"></span>
+          <span id="nowLabel">Now · 00:00</span>
+        </div>
+      </div>
+
+      <div class="grid" id="grid" role="list">
+        <!-- Hours + tasks injected -->
+      </div>
+
+      <div class="grid-empty" id="gridEmpty" hidden>
+        <div class="empty-badge">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+        </div>
+        <h3>Your day is a clean slate</h3>
+        <p>Tap <b>New Task</b> to block your first hour.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= TASK MODAL ================= -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-card glass" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div>
+        <div class="modal-eyebrow" id="modalMode">NEW TASK</div>
+        <h3 id="modalTitle">Block a time slot</h3>
+      </div>
+      <button class="icon-btn" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <form id="taskForm" class="form">
+      <label class="field field--full">
+        <span>Task name</span>
+        <input id="fTask" type="text" placeholder="e.g. Deep work — API refactor" required maxlength="80" />
+      </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span>Starts</span>
+          <input id="fStart" type="time" required />
+        </label>
+        <label class="field">
+          <span>Ends</span>
+          <input id="fEnd" type="time" required />
+        </label>
+      </div>
+
+      <div class="field field--full">
+        <span>Category</span>
+        <div class="cat-picker" id="catPicker"><!-- injected --></div>
+      </div>
+
+      <label class="field field--full">
+        <span>Notes (optional)</span>
+        <textarea id="fNotes" rows="2" placeholder="Any details, links, or subgoals…" maxlength="240"></textarea>
+      </label>
+
+      <div class="modal-foot">
+        <button type="button" class="pill-btn pill-btn--ghost" data-close>Cancel</button>
+        <button type="button" class="pill-btn pill-btn--danger" id="btnDelete" hidden>
+          <span class="pill-glow"></span>
+          Delete
+        </button>
+        <button type="submit" class="pill-btn pill-btn--primary" id="btnSave">
+          <span class="pill-glow"></span>
+          <span id="btnSaveLabel">Add to Schedule</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= TOAST ================= -->
+<div id="toast" class="toast" hidden></div>
+
+<script src="daily-schedule.js"></script>
+</body>
+</html>

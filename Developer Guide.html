@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chrono — Developer Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="daily-schedule.css">
+<style>
+  /* Guide-specific overrides */
+  .doc {
+    position: relative; z-index: 1;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 60px 32px 120px;
+  }
+  .doc-hero {
+    text-align: left;
+    margin-bottom: 60px;
+    padding: 40px 40px 44px;
+    border-radius: 28px;
+  }
+  .doc-hero .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.2em;
+    color: var(--cyan-2);
+    text-shadow: 0 0 10px rgba(0,229,255,0.5);
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(0,229,255,0.08);
+    box-shadow: inset 0 0 0 1px rgba(0,229,255,0.3);
+  }
+  .doc-hero h1 {
+    margin: 20px 0 12px;
+    font-size: 44px; font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+  }
+  .doc-hero h1 em {
+    font-style: normal;
+    color: var(--cyan-2);
+    text-shadow: 0 0 24px rgba(0,229,255,0.5);
+  }
+  .doc-hero p {
+    margin: 0;
+    font-size: 16px; color: var(--ink-60);
+    max-width: 640px; line-height: 1.6;
+  }
+  .doc-hero .open-app {
+    margin-top: 22px;
+    text-decoration: none;
+  }
+
+  .section {
+    margin-top: 56px;
+  }
+  .section-head {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 22px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--cyan-2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(0,229,255,0.08);
+    box-shadow: inset 0 0 0 1px rgba(0,229,255,0.3);
+  }
+  .section h2 {
+    margin: 0;
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  .lead {
+    color: var(--ink-60); font-size: 15px; line-height: 1.65;
+    max-width: 780px; margin: 0 0 24px;
+  }
+
+  h3.sub {
+    margin: 32px 0 12px;
+    font-size: 15px; font-weight: 600;
+    color: var(--ink-100);
+    letter-spacing: -0.005em;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h3.sub::before {
+    content: "";
+    display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan);
+  }
+
+  p, li { color: var(--ink-80); font-size: 14px; line-height: 1.7; }
+  ul { padding-left: 20px; }
+  strong { color: var(--ink-100); }
+  code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--cyan-2);
+  }
+
+  /* Color palette */
+  .palette {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 16px 0 8px;
+  }
+  .swatch {
+    padding: 18px;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    min-height: 130px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .swatch .role {
+    font-family: var(--font-mono);
+    font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .swatch .hex {
+    font-family: var(--font-mono);
+    font-size: 14px; font-weight: 600;
+  }
+  .swatch .name { font-size: 13px; font-weight: 500; margin-top: 4px; }
+  .sw-bg1     { background: #050814; color: #f5f8ff; }
+  .sw-bg2     { background: #0a0f24; color: #f5f8ff; }
+  .sw-bg3     { background: #0e1330; color: #f5f8ff; }
+  .sw-cyan    { background: linear-gradient(140deg, #00E5FF, #00b8d4); color: #04141a; box-shadow: 0 0 30px rgba(0,229,255,0.45), inset 0 1px 0 rgba(255,255,255,0.35); }
+  .sw-magenta { background: linear-gradient(140deg, #FF3D6E, #d92058); color: #14040a; box-shadow: 0 0 30px rgba(255,61,110,0.45), inset 0 1px 0 rgba(255,255,255,0.35); }
+  .sw-violet  { background: linear-gradient(140deg, #8A5CFF, #6b3dff); color: #f5f8ff; box-shadow: 0 0 30px rgba(138,92,255,0.35), inset 0 1px 0 rgba(255,255,255,0.25); }
+  .sw-ink1    { background: #f5f8ff; color: #050814; }
+  .sw-ink2    { background: #99a3c4; color: #050814; }
+  .sw-ink3    { background: #5f6a8a; color: #f5f8ff; }
+
+  /* Type specimens */
+  .type-block {
+    padding: 20px 22px;
+    border-radius: 14px;
+    background: rgba(10,14,30,0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 10px;
+  }
+  .type-block .meta {
+    font-family: var(--font-mono);
+    font-size: 10px; letter-spacing: 0.14em;
+    color: var(--ink-60);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .type-display { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+  .type-h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.01em; }
+  .type-body { font-size: 15px; font-weight: 400; color: var(--ink-80); }
+  .type-mono { font-family: var(--font-mono); font-size: 13px; color: var(--cyan-2); }
+
+  /* Layout preview */
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .wireframe {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(10,14,30,0.4);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .wireframe .wf-label {
+    font-family: var(--font-mono);
+    font-size: 10px; letter-spacing: 0.14em;
+    color: var(--ink-60);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .wf-desktop, .wf-mobile {
+    aspect-ratio: 4 / 3;
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+    padding: 8px;
+    display: grid;
+    gap: 6px;
+  }
+  .wf-desktop {
+    grid-template-columns: 60px 1fr;
+    grid-template-rows: 24px 1fr;
+    grid-template-areas:
+      "side head"
+      "side main";
+  }
+  .wf-mobile {
+    aspect-ratio: 3 / 5;
+    max-width: 180px;
+    margin: 0 auto;
+    grid-template-rows: 24px 1fr 40px;
+    grid-template-areas:
+      "head"
+      "main"
+      "nav";
+  }
+  .wf-el {
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    border: 1px dashed rgba(255,255,255,0.1);
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-size: 9px; color: var(--ink-60);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .wf-el.accent {
+    background: rgba(0,229,255,0.08);
+    border-color: rgba(0,229,255,0.4);
+    color: var(--cyan-2);
+    box-shadow: inset 0 0 12px rgba(0,229,255,0.15);
+  }
+  .wf-el.magenta {
+    background: rgba(255,61,110,0.06);
+    border-color: rgba(255,61,110,0.35);
+    color: var(--magenta-2);
+  }
+  .wf-el.side  { grid-area: side; }
+  .wf-el.head  { grid-area: head; }
+  .wf-el.main  { grid-area: main; align-items: stretch; padding: 6px; }
+  .wf-el.nav   { grid-area: nav; }
+  .wf-main-inner {
+    display: grid; grid-template-rows: 20px 1fr; gap: 4px;
+    width: 100%; height: 100%;
+  }
+  .wf-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px;
+  }
+  .wf-strip > div {
+    background: rgba(0,229,255,0.08);
+    border-radius: 3px;
+    border: 1px solid rgba(0,229,255,0.2);
+  }
+  .wf-block {
+    background: rgba(255,255,255,0.03);
+    border-radius: 4px;
+    border: 1px dashed rgba(255,255,255,0.08);
+  }
+
+  /* Component list */
+  .comp-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .comp {
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .comp-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(0,229,255,0.1);
+    color: var(--cyan);
+    display: grid; place-items: center;
+    flex: none;
+    box-shadow: inset 0 0 0 1px rgba(0,229,255,0.3), 0 0 12px rgba(0,229,255,0.2);
+  }
+  .comp-title { font-size: 13px; font-weight: 600; color: var(--ink-100); }
+  .comp-desc { font-size: 12px; color: var(--ink-60); margin-top: 4px; line-height: 1.5; }
+
+  /* Code block */
+  pre.code {
+    margin: 12px 0;
+    padding: 20px 22px;
+    border-radius: 14px;
+    background: rgba(3, 5, 15, 0.7);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: inset 0 0 30px rgba(0,229,255,0.05);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--ink-80);
+  }
+  pre.code .k { color: #FF7AA0; }         /* keyword */
+  pre.code .s { color: #7CFFB2; }         /* string */
+  pre.code .n { color: #FFC24D; }         /* number */
+  pre.code .c { color: var(--ink-40); font-style: italic; }
+  pre.code .p { color: var(--cyan-2); }   /* property */
+  pre.code .f { color: #8A5CFF; }         /* function */
+
+  /* Steps */
+  .steps {
+    display: flex; flex-direction: column;
+    gap: 12px;
+    counter-reset: step;
+    margin-top: 8px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    padding: 18px 20px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    counter-increment: step;
+    transition: border-color .2s;
+    position: relative;
+  }
+  .step:hover { border-color: rgba(0,229,255,0.25); }
+  .step::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 16px; font-weight: 600;
+    color: var(--cyan-2);
+    text-shadow: 0 0 12px rgba(0,229,255,0.5);
+    letter-spacing: 0.05em;
+    align-self: start;
+    padding-top: 2px;
+  }
+  .step-title {
+    font-size: 15px; font-weight: 600; color: var(--ink-100);
+    margin: 0 0 6px;
+  }
+  .step-body { font-size: 13px; color: var(--ink-60); margin: 0; line-height: 1.6; }
+  .step-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px; letter-spacing: 0.12em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(124,255,178,0.1);
+    color: var(--lime);
+    box-shadow: inset 0 0 0 1px rgba(124,255,178,0.25);
+  }
+
+  .callout {
+    margin: 20px 0;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: linear-gradient(140deg, rgba(0,229,255,0.06), rgba(0,229,255,0.02));
+    border: 1px solid rgba(0,229,255,0.25);
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 13px;
+    color: var(--ink-80);
+  }
+  .callout .cico {
+    width: 24px; height: 24px; border-radius: 6px;
+    color: var(--cyan);
+    display: grid; place-items: center; flex: none;
+    background: rgba(0,229,255,0.08);
+    box-shadow: inset 0 0 0 1px rgba(0,229,255,0.3);
+  }
+
+  .toc {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: 24px;
+  }
+  .toc a {
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--ink-80);
+    font-size: 12px; font-weight: 500;
+    transition: all .15s;
+  }
+  .toc a:hover {
+    color: var(--cyan-2);
+    border-color: rgba(0,229,255,0.35);
+    box-shadow: 0 0 16px rgba(0,229,255,0.2);
+  }
+
+  .footer-note {
+    margin-top: 60px;
+    padding: 24px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .footer-note h4 { margin: 0 0 4px; font-size: 15px; }
+  .footer-note p  { margin: 0; font-size: 13px; color: var(--ink-60); }
+
+  @media (max-width: 720px) {
+    .doc { padding: 30px 18px 80px; }
+    .doc-hero { padding: 28px; }
+    .doc-hero h1 { font-size: 30px; }
+    .palette { grid-template-columns: repeat(2, 1fr); }
+    .layout-grid, .comp-grid { grid-template-columns: 1fr; }
+    .step { grid-template-columns: 32px 1fr; gap: 12px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BG layers -->
+<div class="bg-stage" aria-hidden="true">
+  <div class="bg-gradient"></div>
+  <div class="bg-orb bg-orb--cyan"></div>
+  <div class="bg-orb bg-orb--magenta"></div>
+  <div class="bg-orb bg-orb--violet"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-noise"></div>
+  <div class="bg-leak"></div>
+</div>
+
+<div class="doc">
+
+  <!-- HERO -->
+  <section class="doc-hero glass">
+    <span class="eyebrow">CHRONO · DEVELOPER GUIDE</span>
+    <h1>Build a <em>Daily Schedule</em><br/>web app — end to end.</h1>
+    <p>A senior-level walkthrough covering visual design, data modeling, phased implementation, and a production-ready Vanilla JS reference. Pair this guide with the live demo running next door.</p>
+    <div class="toc">
+      <a href="#s1">01 · Design & Layout</a>
+      <a href="#s2">02 · Data & Storage</a>
+      <a href="#s3">03 · Build Plan</a>
+      <a href="#s4">04 · Code Template</a>
+      <a href="Alarm System Guide.html" style="color: var(--magenta-2); border-color: rgba(255,61,110,0.4);">↗ Alarm &amp; Reminder Guide</a>
+      <a href="Daily Schedule.html" style="color: var(--cyan-2); border-color: rgba(0,229,255,0.4);">↗ Open Live Demo</a>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 1 ================= -->
+  <section id="s1" class="section">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2>UI/UX Design &amp; Layout Strategy</h2>
+    </div>
+    <p class="lead">The visual language is <strong>3D glassmorphism on a dark cinematic canvas</strong> — deep navy gradients, blurred neon orbs, and translucent frosted panels. Two neon accents carry meaning: <strong>cyan</strong> is the primary/action color, <strong>magenta-red</strong> is the alert/destructive color. Together they read as a productivity cockpit, not a calendar page.</p>
+
+    <h3 class="sub">Color palette</h3>
+    <div class="palette">
+      <div class="swatch sw-bg1"><div><div class="role">Canvas · 900</div><div class="name">Void</div></div><div class="hex">#050814</div></div>
+      <div class="swatch sw-bg2"><div><div class="role">Canvas · 800</div><div class="name">Deep Navy</div></div><div class="hex">#0A0F24</div></div>
+      <div class="swatch sw-bg3"><div><div class="role">Canvas · 700</div><div class="name">Midnight</div></div><div class="hex">#0E1330</div></div>
+
+      <div class="swatch sw-cyan"><div><div class="role">Primary · Neon</div><div class="name">Electric Cyan</div></div><div class="hex">#00E5FF</div></div>
+      <div class="swatch sw-magenta"><div><div class="role">Danger · Neon</div><div class="name">Signal Red</div></div><div class="hex">#FF3D6E</div></div>
+      <div class="swatch sw-violet"><div><div class="role">Accent</div><div class="name">Ultraviolet</div></div><div class="hex">#8A5CFF</div></div>
+
+      <div class="swatch sw-ink1"><div><div class="role">Ink · 100</div><div class="name">Photon</div></div><div class="hex">#F5F8FF</div></div>
+      <div class="swatch sw-ink2"><div><div class="role">Ink · 60</div><div class="name">Fog</div></div><div class="hex">#99A3C4</div></div>
+      <div class="swatch sw-ink3"><div><div class="role">Ink · 40</div><div class="name">Slate</div></div><div class="hex">#5F6A8A</div></div>
+    </div>
+
+    <div class="callout">
+      <span class="cico"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg></span>
+      <div><strong>Neon rule:</strong> Every glowing element uses <code>0 0 24px rgba(0,229,255,0.45)</code> as its baseline halo — <code>inset 1px</code> highlight on top, colored rim shadow below. This is what makes surfaces feel 3D instead of flat.</div>
+    </div>
+
+    <h3 class="sub">Typography</h3>
+    <div class="type-block">
+      <div class="meta">Display · Space Grotesk 600–700</div>
+      <div class="type-display">Thursday, July 02</div>
+    </div>
+    <div class="type-block">
+      <div class="meta">Heading · Space Grotesk 600</div>
+      <div class="type-h1">Time Blocks</div>
+    </div>
+    <div class="type-block">
+      <div class="meta">Body · Space Grotesk 400–500</div>
+      <div class="type-body">Deep work — API refactor. Block 09:00 to 11:00 for the auth endpoint shipping deadline.</div>
+    </div>
+    <div class="type-block">
+      <div class="meta">Mono · JetBrains Mono 400–500 · times, labels, tags</div>
+      <div class="type-mono">09:00 → 11:00 · FOCUS · 2.0h scheduled</div>
+    </div>
+
+    <h3 class="sub">Layout — Desktop vs Mobile</h3>
+    <div class="layout-grid">
+      <div class="wireframe">
+        <div class="wf-label">Desktop ≥ 820px</div>
+        <div class="wf-desktop">
+          <div class="wf-el side accent">Sidebar<br/>Nav + Categories</div>
+          <div class="wf-el head">Topbar · date · search · +New</div>
+          <div class="wf-el main">
+            <div class="wf-main-inner">
+              <div class="wf-strip"><div></div><div></div><div></div><div></div></div>
+              <div class="wf-block"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wireframe">
+        <div class="wf-label">Mobile &lt; 820px</div>
+        <div class="wf-mobile">
+          <div class="wf-el head">Topbar · date · +New</div>
+          <div class="wf-el main">
+            <div class="wf-main-inner">
+              <div class="wf-strip"><div></div><div></div></div>
+              <div class="wf-block"></div>
+            </div>
+          </div>
+          <div class="wf-el nav magenta">Horizontal nav strip</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="lead" style="margin-top: 20px;">Desktop is a <strong>CSS Grid</strong> shell: <code>grid-template-columns: 280px 1fr</code>. Sidebar is sticky (<code>position: sticky; top: 22px</code>). Below the 820px breakpoint the whole app collapses to a single column and the sidebar reflows into a horizontal scroll strip.</p>
+
+    <h3 class="sub">Core layout components</h3>
+    <div class="comp-grid">
+      <div class="comp"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></div><div><div class="comp-title">Sidebar</div><div class="comp-desc">Brand mark, workspace nav (Today / Upcoming / Completed), category filter list, footer state pill.</div></div></div>
+      <div class="comp"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h16"/></svg></div><div><div class="comp-title">Topbar</div><div class="comp-desc">Live date + clock, ⌘K search, and the primary neon pill button "New Task".</div></div></div>
+      <div class="comp"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div><div><div class="comp-title">Stat strip</div><div class="comp-desc">Four glass cards: progress ring, focus hours, next-up task, streak counter. All react to task state.</div></div></div>
+      <div class="comp"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div><div class="comp-title">Time-block grid</div><div class="comp-desc">Hour rows from 06:00 → 23:00. Tasks positioned absolutely by minute offset. Live "now" line pulses in magenta.</div></div></div>
+      <div class="comp"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div><div class="comp-title">Task card</div><div class="comp-desc">Frosted pill with left neon accent (category color), circular check, name + meta line. Click card = edit, click check = toggle.</div></div></div>
+      <div class="comp"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12h8"/></svg></div><div><div class="comp-title">Task modal</div><div class="comp-desc">Centered glass card with backdrop blur. Form: name, start/end, category picker (color pills), notes.</div></div></div>
+      <div class="comp"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="9" width="16" height="6" rx="3"/></svg></div><div><div class="comp-title">Pill button</div><div class="comp-desc">The signature control — rounded 999px, cyan or red gradient fill, layered inset highlight + outer neon glow.</div></div></div>
+      <div class="comp"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg></div><div><div class="comp-title">Toast</div><div class="comp-desc">Bottom-center confirmations. Cyan border for success, red border for destructive actions.</div></div></div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 2 ================= -->
+  <section id="s2" class="section">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2>Database &amp; Data Structure</h2>
+    </div>
+    <p class="lead">Frontend-only apps still deserve a real schema. Treat <code>localStorage</code> like a single-table database — one key, one JSON array. Every task is a plain object with a stable <code>id</code>, timestamps as <code>"HH:MM"</code> strings, and a boolean completion flag.</p>
+
+    <h3 class="sub">Task schema</h3>
+<pre class="code"><span class="c">// One task record</span>
+{
+  <span class="p">"id"</span>:          <span class="s">"t_ab12cd34"</span>,        <span class="c">// unique — nanoid or random36</span>
+  <span class="p">"taskName"</span>:    <span class="s">"Deep work — API refactor"</span>,
+  <span class="p">"startTime"</span>:   <span class="s">"09:00"</span>,               <span class="c">// 24h "HH:MM"</span>
+  <span class="p">"endTime"</span>:     <span class="s">"11:00"</span>,
+  <span class="p">"category"</span>:    <span class="s">"focus"</span>,               <span class="c">// enum: focus | meeting | personal | health | learning</span>
+  <span class="p">"notes"</span>:       <span class="s">"Ship auth endpoints"</span>,  <span class="c">// optional, ≤ 240 chars</span>
+  <span class="p">"isCompleted"</span>: <span class="k">false</span>,
+  <span class="p">"createdAt"</span>:   <span class="s">"2026-07-02T09:14:22.031Z"</span>
+}
+
+<span class="c">// The full store — a single array under one key</span>
+localStorage[<span class="s">"chrono.schedule.v1"</span>] = JSON.stringify([task1, task2, ...])</pre>
+
+    <div class="callout">
+      <span class="cico"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></span>
+      <div><strong>Design choice — times as strings, not Date objects.</strong> <code>"09:00"</code> is trivially sortable, JSON-safe, timezone-free, and cheap to render. We only convert to minute-integers when we need arithmetic (positioning tasks in the grid).</div>
+    </div>
+
+    <h3 class="sub">Persistence pattern (LocalStorage)</h3>
+    <p>Three functions is all it takes. Wrap reads in <code>try/catch</code> so a corrupted blob can't brick the app.</p>
+<pre class="code"><span class="k">const</span> <span class="p">STORAGE_KEY</span> = <span class="s">"chrono.schedule.v1"</span>;
+
+<span class="c">// Read once on boot</span>
+<span class="k">function</span> <span class="f">loadTasks</span>() {
+  <span class="k">try</span> {
+    <span class="k">const</span> raw = localStorage.<span class="f">getItem</span>(<span class="p">STORAGE_KEY</span>);
+    <span class="k">const</span> parsed = raw ? <span class="p">JSON</span>.<span class="f">parse</span>(raw) : [];
+    <span class="k">return</span> <span class="p">Array</span>.<span class="f">isArray</span>(parsed) ? parsed : [];
+  } <span class="k">catch</span> {
+    <span class="k">return</span> [];  <span class="c">// corrupted? start fresh</span>
+  }
+}
+
+<span class="c">// Write after every mutation</span>
+<span class="k">function</span> <span class="f">saveTasks</span>(tasks) {
+  localStorage.<span class="f">setItem</span>(<span class="p">STORAGE_KEY</span>, <span class="p">JSON</span>.<span class="f">stringify</span>(tasks));
+}
+
+<span class="c">// Optional: cross-tab sync</span>
+window.<span class="f">addEventListener</span>(<span class="s">"storage"</span>, (e) =&gt; {
+  <span class="k">if</span> (e.key === <span class="p">STORAGE_KEY</span>) <span class="f">rerenderAll</span>();
+});</pre>
+
+    <p><strong>Namespace the key</strong> (<code>chrono.schedule.v1</code>). The <code>v1</code> suffix lets you migrate the schema later without eating existing users' data — write a one-time <code>migrateV1toV2()</code> when the shape changes.</p>
+  </section>
+
+  <!-- ================= SECTION 3 ================= -->
+  <section id="s3" class="section">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2>Step-by-Step Implementation Plan</h2>
+    </div>
+    <p class="lead">Ship in vertical slices, not horizontal ones. Get a rough end-to-end path working first (add → render → persist), then loop back and polish. This order stays motivating because you have something to click at every stage.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div>
+          <h4 class="step-title">Semantic HTML skeleton</h4>
+          <p class="step-body">Write the full page structure with real tags — <code>&lt;aside&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;header&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;form&gt;</code>. No styling yet. Include the modal markup (hidden by default). Add ARIA labels to icon-only buttons.</p>
+          <span class="step-tag">Day 1 · 1 hour</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">Design tokens as CSS variables</h4>
+          <p class="step-body">Declare all colors, radii, fonts, and shadows on <code>:root</code>. Import Space Grotesk + JetBrains Mono. Now the aesthetic is systemic — changing one variable ripples everywhere.</p>
+          <span class="step-tag">Day 1 · 1 hour</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">Cinematic background stack</h4>
+          <p class="step-body">Layer five <code>position: fixed</code> divs: gradient, three blurred neon orbs, subtle SVG-noise. Add a CSS keyframe (<code>@keyframes drift</code>) so the orbs float. This is 60% of the "premium" feel.</p>
+          <span class="step-tag">Day 1 · 45 min</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">Glassmorphism base class</h4>
+          <p class="step-body">Build one <code>.glass</code> utility: translucent gradient background, <code>backdrop-filter: blur(24px)</code>, inset white highlight, outer drop shadow. Apply to sidebar, stat cards, grid wrapper, and modal.</p>
+          <span class="step-tag">Day 1 · 30 min</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">Neon pill button component</h4>
+          <p class="step-body">This is the hero interaction. Layer <code>inset 1px rgba(255,255,255,0.3)</code> on top, <code>0 0 24px cyan</code> outside, gradient fill in between. Add <code>:hover</code> lift + boosted glow. Make cyan (primary) and red (danger) variants.</p>
+          <span class="step-tag">Day 1 · 45 min</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">Static task list (no state yet)</h4>
+          <p class="step-body">Hard-code 3–4 dummy task cards in HTML. Style them until they feel right — accent bar, circular check, ellipsis on long names. Get the visual language locked before adding logic.</p>
+          <span class="step-tag">Day 2 · 45 min</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">Add-task flow — modal + form + array push</h4>
+          <p class="step-body">Wire "New Task" to show the modal. On submit, push a new object into a JS array, call <code>renderGrid()</code>, close the modal. No LocalStorage yet — just get the round-trip working in memory.</p>
+          <span class="step-tag">Day 2 · 1 hour</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">Delete + toggle-complete</h4>
+          <p class="step-body">Attach click handlers via event delegation on <code>#grid</code>. Distinguish <code>.task-check</code> clicks (toggle <code>isCompleted</code>) from card clicks (open edit modal). Re-render after every mutation.</p>
+          <span class="step-tag">Day 2 · 45 min</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">LocalStorage persistence</h4>
+          <p class="step-body">Add <code>loadTasks()</code> on boot and <code>saveTasks()</code> after every mutation. Refresh the page — your data should still be there. This is the moment the app stops being a toy.</p>
+          <span class="step-tag">Day 3 · 30 min</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">Time-block positioning</h4>
+          <p class="step-body">Replace the flat list with the grid. Convert <code>startTime</code>/<code>endTime</code> to minutes, compute pixel <code>top</code> and <code>height</code> based on hour row height. Add the pulsing "now" line at <code>currentMinutes / 60 × HOUR_HEIGHT</code>.</p>
+          <span class="step-tag">Day 3 · 1.5 hours</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">Filters, search, stats, streak</h4>
+          <p class="step-body">Category chips + search input drive a <code>filteredTasks()</code> function. The stat strip (done %, hours scheduled, next up) is derived from the filtered array — pure functions, no extra state.</p>
+          <span class="step-tag">Day 3 · 1 hour</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div>
+          <h4 class="step-title">Polish — animations, toasts, keyboard shortcuts</h4>
+          <p class="step-body">Modal fade-in transform, task-complete cyan pulse, toast on every mutation. Bind <code>⌘K</code> to search focus and <code>⌘N</code> to open the modal. Test the mobile layout at 375px.</p>
+          <span class="step-tag">Day 4 · 1.5 hours</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 4 ================= -->
+  <section id="s4" class="section">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2>Production-Ready Code Template</h2>
+    </div>
+    <p class="lead">The full production source is split across three files in this project — click through to read the actual code that powers the live demo. Below are the essential snippets that show how the pieces connect.</p>
+
+    <div class="comp-grid" style="margin-bottom: 24px;">
+      <a class="comp" href="Daily Schedule.html" style="text-decoration: none;"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 8 4-4h8l4 4v12H4z"/><path d="M4 8h16"/></svg></div><div><div class="comp-title">Daily Schedule.html</div><div class="comp-desc">Semantic markup, modal, sidebar, grid shell. Loads css + js.</div></div></a>
+      <a class="comp" href="daily-schedule.css" style="text-decoration: none;"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18M3 12h18"/></svg></div><div><div class="comp-title">daily-schedule.css</div><div class="comp-desc">All tokens, glassmorphism, neon effects, grid, responsive rules.</div></div></a>
+      <a class="comp" href="daily-schedule.js" style="text-decoration: none;"><div class="comp-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 6-4 6 4 6M16 6l4 6-4 6"/></svg></div><div><div class="comp-title">daily-schedule.js</div><div class="comp-desc">State, render, CRUD, LocalStorage, event binding, live clock.</div></div></a>
+    </div>
+
+    <h3 class="sub">Core CRUD — the whole surface</h3>
+<pre class="code"><span class="c">// ---------- State ----------</span>
+<span class="k">let</span> state = { tasks: <span class="f">loadTasks</span>(), filterCat: <span class="s">"all"</span>, search: <span class="s">""</span> };
+
+<span class="c">// ---------- CREATE ----------</span>
+<span class="k">function</span> <span class="f">addTask</span>(data) {
+  <span class="k">const</span> task = {
+    id: <span class="f">uid</span>(),
+    taskName: data.taskName.<span class="f">trim</span>(),
+    startTime: data.startTime,
+    endTime: data.endTime,
+    category: data.category,
+    notes: (data.notes || <span class="s">""</span>).<span class="f">trim</span>(),
+    isCompleted: <span class="k">false</span>,
+    createdAt: <span class="k">new</span> <span class="f">Date</span>().<span class="f">toISOString</span>(),
+  };
+  state.tasks.<span class="f">push</span>(task);
+  <span class="f">saveTasks</span>();
+  <span class="f">renderAll</span>();
+}
+
+<span class="c">// ---------- UPDATE (edit) ----------</span>
+<span class="k">function</span> <span class="f">updateTask</span>(id, data) {
+  <span class="k">const</span> t = state.tasks.<span class="f">find</span>(x =&gt; x.id === id);
+  <span class="k">if</span> (!t) <span class="k">return</span>;
+  <span class="p">Object</span>.<span class="f">assign</span>(t, data);
+  <span class="f">saveTasks</span>();
+  <span class="f">renderAll</span>();
+}
+
+<span class="c">// ---------- DELETE ----------</span>
+<span class="k">function</span> <span class="f">deleteTask</span>(id) {
+  state.tasks = state.tasks.<span class="f">filter</span>(x =&gt; x.id !== id);
+  <span class="f">saveTasks</span>();
+  <span class="f">renderAll</span>();
+}
+
+<span class="c">// ---------- TOGGLE ----------</span>
+<span class="k">function</span> <span class="f">toggleTask</span>(id) {
+  <span class="k">const</span> t = state.tasks.<span class="f">find</span>(x =&gt; x.id === id);
+  <span class="k">if</span> (t) { t.isCompleted = !t.isCompleted; <span class="f">saveTasks</span>(); <span class="f">renderAll</span>(); }
+}
+
+<span class="c">// ---------- Boot ----------</span>
+<span class="f">renderAll</span>();</pre>
+
+    <h3 class="sub">Positioning a task on the time-block grid</h3>
+<pre class="code"><span class="k">const</span> <span class="p">START_HOUR</span> = <span class="n">6</span>;
+<span class="k">const</span> <span class="p">HOUR_H</span> = <span class="n">70</span>;   <span class="c">// px per hour row</span>
+
+<span class="k">function</span> <span class="f">toMinutes</span>(hhmm) {
+  <span class="k">const</span> [h, m] = hhmm.<span class="f">split</span>(<span class="s">":"</span>).<span class="f">map</span>(<span class="p">Number</span>);
+  <span class="k">return</span> h * <span class="n">60</span> + m;
+}
+
+<span class="k">function</span> <span class="f">placeTask</span>(task) {
+  <span class="k">const</span> startMin = <span class="f">toMinutes</span>(task.startTime);
+  <span class="k">const</span> endMin   = <span class="f">toMinutes</span>(task.endTime);
+  <span class="k">const</span> offset   = startMin - <span class="p">START_HOUR</span> * <span class="n">60</span>;
+  <span class="k">const</span> duration = endMin - startMin;
+
+  <span class="k">const</span> top    = (offset / <span class="n">60</span>) * <span class="p">HOUR_H</span>;
+  <span class="k">const</span> height = <span class="p">Math</span>.<span class="f">max</span>(<span class="n">38</span>, (duration / <span class="n">60</span>) * <span class="p">HOUR_H</span> - <span class="n">4</span>);
+
+  <span class="k">return</span> { top, height };
+}</pre>
+
+    <h3 class="sub">Event delegation — one listener, all clicks</h3>
+<pre class="code"><span class="p">grid</span>.<span class="f">addEventListener</span>(<span class="s">"click"</span>, (e) =&gt; {
+  <span class="k">const</span> card = e.target.<span class="f">closest</span>(<span class="s">".task"</span>);
+  <span class="k">if</span> (!card) <span class="k">return</span>;
+
+  <span class="k">const</span> id = card.dataset.id;
+  <span class="k">if</span> (e.target.<span class="f">closest</span>(<span class="s">".task-check"</span>)) {
+    <span class="f">toggleTask</span>(id);          <span class="c">// clicked the circle</span>
+  } <span class="k">else</span> {
+    <span class="f">openModal</span>(id);           <span class="c">// clicked the card</span>
+  }
+});</pre>
+
+    <div class="callout">
+      <span class="cico"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M12 4v16"/></svg></span>
+      <div><strong>Why event delegation?</strong> You never have to re-bind listeners when tasks are added or removed. One handler on the parent stays alive forever and uses <code>e.target.closest()</code> to figure out what was clicked.</div>
+    </div>
+
+    <h3 class="sub">Live "now" line</h3>
+<pre class="code"><span class="c">// Runs every 30 seconds — cheap</span>
+<span class="f">setInterval</span>(() =&gt; {
+  <span class="k">const</span> d = <span class="k">new</span> <span class="f">Date</span>();
+  <span class="k">const</span> mins = d.<span class="f">getHours</span>() * <span class="n">60</span> + d.<span class="f">getMinutes</span>();
+  <span class="k">const</span> offset = mins - <span class="p">START_HOUR</span> * <span class="n">60</span>;
+  <span class="p">nowLine</span>.style.top = <span class="s">`${(offset / 60) * HOUR_H}px`</span>;
+}, <span class="n">30_000</span>);</pre>
+  </section>
+
+  <!-- Footer -->
+  <div class="footer-note glass">
+    <div>
+      <h4>Ready to run it?</h4>
+      <p>The full working app — three files, zero dependencies, ~800 lines of code — is right next door.</p>
+    </div>
+    <a href="Daily Schedule.html" class="pill-btn pill-btn--primary" style="text-decoration: none;">
+      <span class="pill-glow"></span>
+      Open Chrono
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+
+</div>
+
+</body>
+</html>
