@@ -308,6 +308,7 @@ function renderGrid() {
 
   const tasks = filteredTasks();
   $("#gridEmpty").hidden = tasks.length !== 0;
+  renderScheduleSummary(tasks);
 
   tasks.forEach(t => {
     const cat = catById(t.category);
@@ -373,6 +374,37 @@ function renderGrid() {
   });
 
   $("#nowLabel").textContent = `Now · ${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`;
+}
+
+function renderScheduleSummary(tasks) {
+  const wrapper = $("#gridSchedule");
+  const list = $("#scheduleItems");
+  const count = $("#scheduleCount");
+  const visible = tasks.slice().sort((a,b) => toMinutes(a.startTime) - toMinutes(b.startTime));
+
+  if (!wrapper || !list || !count) return;
+  wrapper.hidden = visible.length === 0;
+  count.textContent = `${visible.length} task${visible.length === 1 ? "" : "s"}`;
+
+  if (!visible.length) {
+    list.innerHTML = `<div class="schedule-empty">No scheduled time blocks are visible. Add a task to see it in the list.</div>`;
+    return;
+  }
+
+  list.innerHTML = visible.map(task => {
+    const cat = catById(task.category).label;
+    return `
+      <div class="schedule-item">
+        <div class="schedule-top">
+          <h4>${escapeHtml(task.taskName)}</h4>
+          <span class="schedule-range">${task.startTime} — ${task.endTime}</span>
+        </div>
+        <div class="schedule-meta">
+          <span>${escapeHtml(cat)}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
 function escapeHtml(s) {
@@ -591,6 +623,9 @@ function updateTask(id, data) {
     notes: (data.notes || "").trim(),
     alarm: data.alarm || t.alarm || DEFAULT_ALARM(),
   });
+  state.view = "today";
+  state.filterCat = "all";
+  state.search = "";
   saveTasks();
   renderAll();
   toast(`Updated "${t.taskName}"`);

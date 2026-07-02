@@ -636,6 +636,110 @@ input, textarea, select { font: inherit; color: inherit; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 12px 30px -10px rgba(0,0,0,0.7), 0 0 20px -6px var(--cat-color, var(--cyan));
 }
 
+.grid-schedule {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.schedule-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.schedule-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-80);
+}
+.schedule-sub {
+  font-size: 13px;
+  color: var(--ink-60);
+}
+.schedule-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-100);
+}
+.schedule-items {
+  display: grid;
+  gap: 12px;
+}
+.schedule-item {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  display: grid;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.schedule-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(0,229,255,0.75), rgba(0,229,255,0.18));
+}
+.schedule-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.schedule-item h4 {
+  margin: 0;
+  font-size: 0.96rem;
+  color: var(--ink-100);
+  line-height: 1.3;
+}
+.schedule-range {
+  color: var(--ink-60);
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.schedule-meta {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  align-items: center;
+  color: var(--ink-60);
+  font-size: 0.84rem;
+  font-family: var(--font-mono);
+}
+.schedule-empty {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.02);
+  color: var(--ink-60);
+  text-align: center;
+}
+.schedule-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink-60);
+}
+.schedule-empty {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.02);
+  color: var(--ink-60);
+  text-align: center;
+}
+
 .task-check {
   flex: none;
   width: 20px; height: 20px;
